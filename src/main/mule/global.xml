@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<mule xmlns:json-logger="http://www.mulesoft.org/schema/mule/json-logger" xmlns:secure-properties="http://www.mulesoft.org/schema/mule/secure-properties"
+	xmlns:file="http://www.mulesoft.org/schema/mule/file"
+	xmlns:http="http://www.mulesoft.org/schema/mule/http" xmlns="http://www.mulesoft.org/schema/mule/core" xmlns:doc="http://www.mulesoft.org/schema/mule/documentation" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd
+http://www.mulesoft.org/schema/mule/http http://www.mulesoft.org/schema/mule/http/current/mule-http.xsd
+http://www.mulesoft.org/schema/mule/file http://www.mulesoft.org/schema/mule/file/current/mule-file.xsd
+http://www.mulesoft.org/schema/mule/secure-properties http://www.mulesoft.org/schema/mule/secure-properties/current/mule-secure-properties.xsd
+http://www.mulesoft.org/schema/mule/json-logger http://www.mulesoft.org/schema/mule/json-logger/current/mule-json-logger.xsd">
+	<configuration-properties doc:name="Configuration properties" doc:id="7846a881-fedd-4a4c-9e00-f145003455e5" file="config.yaml" />
+	<http:listener-config name="HTTP_Listener_config" doc:name="HTTP Listener config" doc:id="e00c59db-6a39-4d6a-a0d1-253b8fa83667" >
+		<http:listener-connection host="${secure::http.host}" port="${secure::http.port}" />
+	</http:listener-config>
+	<file:config name="File_Read_Config" doc:name="File Config" doc:id="a2b23784-9cb4-4da5-95b3-2b02dee50927" >
+		<file:connection workingDir="${secure::path.readPDFfrom}" />
+	</file:config>
+	<file:config name="File_Write_Config" doc:name="File Config" doc:id="fb689069-5a46-4c33-a46c-3694d1d2aa43" timeBetweenSizeCheck="2000">
+		<file:connection workingDir="${secure::path.writePDFto}" />
+	</file:config>
+	<configuration doc:name="Configuration" doc:id="9b9eb888-c4e1-4aa5-b77a-55bd77d6e384" defaultErrorHandler-ref="allErrorHandler" />
+	<secure-properties:config name="Secure_Properties_Config" doc:name="Secure Properties Config" doc:id="a92cae68-fb62-4918-bbf3-bfc7801cfd54" file="config.yaml" key="${secure.key}" >
+		<secure-properties:encrypt algorithm="Blowfish" />
+	</secure-properties:config>
+	<json-logger:config name="JSON_Logger_Config" doc:name="JSON Logger Config" doc:id="7bb636e7-aa39-4ff9-9bf7-f8ba09328052" environment="${mule.env}" />
+	<configuration-properties doc:name="Configuration properties" doc:id="5456edd3-6945-4a64-ae9b-52748423d9f2" file="info.properties" />
+</mule>
+	

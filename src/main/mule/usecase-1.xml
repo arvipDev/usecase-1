@@ -1,0 +1,61 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<mule xmlns:json-logger="http://www.mulesoft.org/schema/mule/json-logger" xmlns:ee="http://www.mulesoft.org/schema/mule/ee/core"
+	xmlns:file="http://www.mulesoft.org/schema/mule/file"
+	xmlns:http="http://www.mulesoft.org/schema/mule/http" xmlns="http://www.mulesoft.org/schema/mule/core" xmlns:doc="http://www.mulesoft.org/schema/mule/documentation" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd
+http://www.mulesoft.org/schema/mule/http http://www.mulesoft.org/schema/mule/http/current/mule-http.xsd
+http://www.mulesoft.org/schema/mule/file http://www.mulesoft.org/schema/mule/file/current/mule-file.xsd
+http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd
+http://www.mulesoft.org/schema/mule/json-logger http://www.mulesoft.org/schema/mule/json-logger/current/mule-json-logger.xsd">
+	<flow name="pdf-to-base64" doc:id="7cd3e231-6e09-46fe-92df-78735eafe562" >
+		<http:listener doc:name="convetPDF" doc:id="baaf372b-9687-4155-a4ae-039e37df6a0a" path="/convertPDF" config-ref="HTTP_Listener_config"/>
+		<file:read doc:id="577cb65d-f662-4ddf-91f8-b128037498a8" path="C:\Arvind\Support\test\MCD-L1.pdf" doc:name="Read_PDF" config-ref="File_Read_Config"/>
+		<json-logger:logger doc:name="Logger" doc:id="d9f70bf0-6730-49f9-accb-a04586579c6a" config-ref="JSON_Logger_Config" message="#[payload]"/>
+		<ee:transform doc:name="Transform Message" doc:id="4c493998-4ffc-4217-a3b1-4a32293cd924" >
+			<ee:message >
+				<ee:set-payload ><![CDATA[%dw 2.0
+output text/plain
+import toBase64 from dw::core::Binaries
+---
+toBase64(payload)
+]]></ee:set-payload>
+			</ee:message>
+		</ee:transform>
+		<set-variable value="#[payload]" doc:name="content_in_base64" doc:id="5a5b192c-5630-4541-bb82-fc2a7434aac4" variableName="content"/>
+		<flow-ref doc:name="base64-to-pdf" doc:id="13920c21-35a6-4296-bd7b-90f9e94765d8" name="base64-to-pdf" targetValue="#[vars.content]"/>
+		<set-payload value='"File successfully processed"' doc:name="Set Payload" doc:id="e4ff8279-6d76-4c23-b5cd-838f01c3c830" />
+	</flow>
+	<sub-flow name="base64-to-pdf" doc:id="85f583e2-106f-4a9c-9989-b940aa78ab10" >
+		<file:write doc:name="Write_Base64" doc:id="2b7e7735-1efa-46e2-add7-4a4254205607" config-ref="File_Write_Config" path="C:\Arvind\Support\result\PDF_to_Base64.txt" />
+		<json-logger:logger doc:name="Logger" doc:id="50381028-d422-4c25-9d07-c6e3324a2b59" config-ref="JSON_Logger_Config" message="#[payload]" />
+		<ee:transform doc:name="Transform Message" doc:id="d3e4db2a-3fd7-4958-a33a-1420be998074">
+			<ee:message>
+				<ee:set-payload><![CDATA[%dw 2.0
+output multipart/form-data
+import * from dw::core::Binaries
+import * from dw::Runtime
+---
+{
+	parts: {
+		base64Content: {
+			headers: {
+				"Content-Type": "application/PDF"
+			},
+			content: fromBase64(payload)
+		},
+	}
+} 
+]]></ee:set-payload>
+			</ee:message>
+		</ee:transform>
+		<file:write doc:name="Write_PDF" doc:id="c78664af-d160-4fff-989f-a0f1b85e55cd" path="C:\Arvind\Support\result\Base64_to_PDF.pdf" config-ref="File_Write_Config" />
+	</sub-flow>
+	<error-handler name="allErrorHandler" doc:id="69930bab-7d13-456b-b68c-4d778a49d1bb" >
+		<on-error-continue enableNotifications="true" logException="true" doc:name="On Error Continue" doc:id="61fd0da8-94eb-4634-af40-9e5bd2ec8aea" type="STREAM_MAXIMUM_SIZE_EXCEEDED">
+			<set-payload value='#["Error occurred while streaming data. Error description: " ++ payload.error.description as String ++ " Error type: " ++ payload.error.errorType as String]' doc:name="Set Payload" doc:id="1b2e284f-60d0-4940-b3ef-d750132ea43b" />
+		</on-error-continue>
+		<on-error-continue enableNotifications="true" logException="true" doc:name="On Error Continue" doc:id="7fafd365-1f82-446f-877c-d9e580d0d8c4" type="EXPRESSION">
+			<set-payload value='"Error in DataWeave Expression"' doc:name="Set Payload" doc:id="33f8e9a6-6d3e-49ec-a10d-edae02f7cb42" />
+		</on-error-continue>
+	</error-handler>
+</mule>

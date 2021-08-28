@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<mule xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xmlns:munit="http://www.mulesoft.org/schema/mule/munit" xmlns:munit-tools="http://www.mulesoft.org/schema/mule/munit-tools"
+	xmlns="http://www.mulesoft.org/schema/mule/core" xmlns:doc="http://www.mulesoft.org/schema/mule/documentation"
+	xsi:schemaLocation="
+		http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd
+		http://www.mulesoft.org/schema/mule/munit http://www.mulesoft.org/schema/mule/munit/current/mule-munit.xsd
+		http://www.mulesoft.org/schema/mule/munit-tools  http://www.mulesoft.org/schema/mule/munit-tools/current/mule-munit-tools.xsd">
+	<munit:config name="usecase-1-test-suite.xml" />
+	<global-property doc:name="Global Property" doc:id="4c158238-6769-4823-a788-390166a3e9cf" name="secure.key" value="UseCase" />
+	<munit:test name="usecase-1-test-suite-pdf-to-base64Test" doc:id="3101fc7d-21fd-427b-8e0b-a2f0e1f257fc" description="Test">
+		<munit:execution >
+			<flow-ref doc:name="Flow-ref to pdf-to-base64" doc:id="09357a82-8e26-4aca-b8ea-5c4ddd8744b5" name="pdf-to-base64"/>
+		</munit:execution>
+		<munit:validation >
+			<munit-tools:assert-that doc:name="Assert that" doc:id="73bc37a8-843f-4c17-849b-3d730d6615b5" expression="#[payload]" is="#[MunitTools::notNullValue()]" message="Payload is Null"/>
+			<munit-tools:assert-that doc:name="Assert that" doc:id="531f1bdd-fda5-4ab1-b077-5d5f02c7f092" expression="#[payload]" is="#[MunitTools::withMediaType('*/*')]"/>
+		</munit:validation>
+	</munit:test>
+	<munit:test name="usecase-1-test-suite-base64-to-pdfTest" doc:id="89a538dd-4dfa-4544-aa6f-2f91385671ed" description="Test">
+		<munit:execution >
+			<flow-ref doc:name="Flow-ref to base64-to-pdf" doc:id="428ac31a-3fa3-48d6-b712-eb0966639a70" name="base64-to-pdf"/>
+		</munit:execution>
+		<munit:validation >
+			<munit-tools:assert-that doc:name="Assert that" doc:id="ecf2e4ac-1e2a-4e6d-9a54-d28c3be9620a" is="#[MunitTools::notNullValue()]" expression="#[payload]"/>
+			<munit-tools:assert-that doc:name="Assert that" doc:id="d9d7345f-62c2-416a-b41e-d929c887807c" expression="#[payload]" is="#[MunitTools::withMediaType('multipart/form-data')]" />
+		</munit:validation>
+	</munit:test>
+
+
+</mule>
